@@ -1,0 +1,58 @@
+---
+name: Filament Sensor Reloaded CI
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */12 * * *"
+
+jobs:
+  install-branch:
+    name: Install branch
+    strategy:
+      matrix:
+        os: ["ubuntu-latest"]
+        python: ["3.7", "3.8", "3.9", "3.10"]
+        branch: ["master"]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: 🐍 Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v4
+        with:
+          repository: 'OctoPrint/OctoPrint'
+          ref: ${{ matrix.branch }}
+          fetch-depth: 0
+          run: |
+            pip install .
+      - name: ⬇ Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ matrix.branch }}
+          fetch-depth: 0
+      - name: 👷 Install Filament Sensor Reloaded CI
+        run: |
+          pip install .
+
+#  install-latest:
+#    name: Install latest release
+#    strategy:
+#      matrix:
+#        os: ["ubuntu-latest"]
+#        python: ["3.7", "3.8", "3.9", "3.10"]
+#    runs-on: ${{ matrix.os }}
+#    steps:
+#      - name: 👀 Determine latest release
+#        run: |
+#          OCTOPRINT_VERSION=$(curl -i https://github.com/OctoPrint/OctoPrint/releases/latest | grep -i location: | head -n1 | awk -F/ '{print $NF}' | tr -d '\r')
+#          echo "OCTOPRINT_VERSION=$OCTOPRINT_VERSION" >> $GITHUB_ENV
+#      - name: 🐍 Set up Python ${{ matrix.python }}
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: ${{ matrix.python }}
+#      - name: 👷 Build and install latest release
+#        run: |
+#          pip install https://github.com/OctoPrint/OctoPrint/archive/${{ env.OCTOPRINT_VERSION }}.zip
