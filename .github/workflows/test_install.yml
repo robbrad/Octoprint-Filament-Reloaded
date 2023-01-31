@@ -32,17 +32,6 @@ jobs:
           fetch-depth: 0
       - run: |
             pip install .
-      - name: 🏗 Create base config for test server
-        run: |
-          mkdir e2econfig
-          cp -r .github/fixtures/with_acl/* e2econfig
-      - name: 🚀 Run Cypress
-        uses: cypress-io/github-action@v4.2.0
-        with:
-          working-directory: /home/runner/work/Octoprint-Filament-Reloaded/Octoprint-Filament-Reloaded/tests/cypress
-          browser: chrome
-          start: "octoprint -b ${{ github.workspace }}/e2econfig serve --host 127.0.0.1 --port 5000"
-          wait-on: "http://127.0.0.1:5000/online.txt"
       - name: ⬇ Checkout code
         uses: actions/checkout@v3
         with:
@@ -50,9 +39,30 @@ jobs:
           fetch-depth: 0
       - name: 👷 Install Filament Sensor Reloaded CI
         run: |
-          pip install .
-
-
+          pip install .      
+      - name: 🏗 Create base config for test server
+        run: |
+          mkdir e2econfig
+          cp -r .github/fixtures/with_acl/* e2econfig
+      - name: 🚀 Run Cypress
+        uses: cypress-io/github-action@v4.2.0
+        with:
+          working-directory: tests/cypress
+          browser: chrome
+          start: "octoprint -b ${{ github.workspace }}/e2econfig serve --host 127.0.0.1 --port 5000"
+          wait-on: "http://127.0.0.1:5000/online.txt"
+      - name: ⬆ Upload screenshots
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: tests/cypress/screenshots
+      - name: ⬆ Upload videos
+        uses: actions/upload-artifact@v1
+        if: always()
+        with:
+          name: cypress-videos
+          path: tests/cypress/videos
 
 #  install-latest:
 #    name: Install latest release
