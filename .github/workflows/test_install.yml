@@ -26,7 +26,7 @@ jobs:
           repository: 'OctoPrint/OctoPrint'
           ref: ${{ matrix.branch }}
           fetch-depth: 0
-          run: |
+      - run: |
             pip install .
       - name: ⬇ Checkout code
         uses: actions/checkout@v3
@@ -36,6 +36,13 @@ jobs:
       - name: 👷 Install Filament Sensor Reloaded CI
         run: |
           pip install .
+      - name: 👷 Restart OctoPrint
+        run: |
+          sudo service octoprint restart
+      - name: 👷 Check if Octoprint is running
+        run: |
+          ps -ef | grep -i octoprint | grep -i python 
+
 
 #  install-latest:
 #    name: Install latest release
