@@ -32,6 +32,16 @@ jobs:
           fetch-depth: 0
       - run: |
             pip install .
+      - name: 🏗 Create base config for test server
+        run: |
+          mkdir e2econfig
+          cp -r .github/fixtures/with_acl/* e2econfig
+      - name: 🚀 Run OctoPrint
+        uses: cypress-io/github-action@v4.2.0
+        with:
+          browser: chrome
+          start: "octoprint -b ${{ github.workspace }}/e2econfig serve --host 127.0.0.1 --port 5000"
+          wait-on: "http://127.0.0.1:5000/online.txt"
       - name: ⬇ Checkout code
         uses: actions/checkout@v3
         with:
@@ -40,13 +50,12 @@ jobs:
       - name: 👷 Install Filament Sensor Reloaded CI
         run: |
           pip install .
-      - name: 👷 Restart OctoPrint
-        run: |
-          sudo service octoprint restart
-      - name: 👷 Check if Octoprint is running
-        run: |
-          ps -ef | grep -i octoprint | grep -i python 
-
+      - name: 🚀 Run OctoPrint with Plugin
+        uses: cypress-io/github-action@v4.2.0
+        with:
+          browser: chrome
+          start: "octoprint -b ${{ github.workspace }}/e2econfig serve --host 127.0.0.1 --port 5000"
+          wait-on: "http://127.0.0.1:5000/online.txt"
 
 #  install-latest:
 #    name: Install latest release
